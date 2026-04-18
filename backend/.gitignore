@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+timetable.db
+.env
+test_output.pdf
+.venv/
