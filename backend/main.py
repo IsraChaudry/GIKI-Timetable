@@ -5,6 +5,9 @@ from api import faculties, departments, batches, teachers, rooms, courses
 from api import scheduler, timetable, conflicts, export
 from auth import router as auth_router
 
+from dotenv import load_dotenv
+load_dotenv()
+
 # Import all models so Base knows about them before create_all
 from models import faculty, department, batch, teacher, room, course, schedule
 
