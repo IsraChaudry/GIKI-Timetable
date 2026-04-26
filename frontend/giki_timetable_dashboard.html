@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8" />
+<script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:#0a0e1a;color:#e2e8f0;min-height:100vh}
+:root{
+  --bg-deep:#0a0e1a;
+  --bg-card:#111827;
+  --bg-card2:#1a2235;
+  --border:#2a3550;
+  --accent:#3b82f6;
+  --accent2:#06b6d4;
+  --accent3:#8b5cf6;
+  --success:#10b981;
+  --warn:#f59e0b;
+  --danger:#ef4444;
+  --text:#e2e8f0;
+  --muted:#6b7280;
+  --mono:'Space Mono',monospace;
+}
+.app{display:flex;height:100vh;overflow:hidden}
+.sidebar{width:220px;background:var(--bg-card);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0}
+.sidebar-logo{padding:20px 16px;border-bottom:1px solid var(--border)}
+.logo-text{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--accent);letter-spacing:2px}
+.logo-sub{font-size:10px;color:var(--muted);margin-top:2px;letter-spacing:1px}
+.nav{padding:12px 8px;flex:1}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;cursor:pointer;font-size:13px;color:var(--muted);margin-bottom:2px;transition:all .15s}
+.nav-item:hover{background:var(--bg-card2);color:var(--text)}
+.nav-item.active{background:rgba(59,130,246,.12);color:var(--accent);border:1px solid rgba(59,130,246,.2)}
+.nav-icon{width:16px;height:16px;opacity:.7}
+.sidebar-bottom{padding:12px;border-top:1px solid var(--border)}
+.auth-pill{background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.2);border-radius:20px;padding:6px 12px;font-size:11px;color:var(--success);font-family:var(--mono);cursor:pointer}
+.main{flex:1;overflow:auto;display:flex;flex-direction:column}
+.topbar{padding:16px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--bg-card);flex-shrink:0}
+.page-title{font-size:15px;font-weight:600;font-family:var(--mono);letter-spacing:.5px}
+.content{padding:24px;flex:1}
+.login-wrap{display:flex;align-items:center;justify-content:center;height:100%;min-height:400px}
+.login-card{background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:40px;width:340px}
+.login-title{font-family:var(--mono);font-size:18px;color:var(--accent);margin-bottom:6px}
+.login-sub{font-size:13px;color:var(--muted);margin-bottom:28px}
+.field-label{font-size:11px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;font-family:var(--mono)}
+.field-input{width:100%;background:var(--bg-card2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-size:14px;outline:none;transition:border .15s}
+.field-input:focus{border-color:var(--accent)}
+.btn{padding:10px 20px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;border:none;font-family:'DM Sans',sans-serif}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{background:#2563eb}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed}
+.btn-sm{padding:6px 12px;font-size:12px}
+.btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--border)}
+.btn-ghost:hover{color:var(--text);border-color:var(--accent)}
+.btn-success{background:var(--success);color:#fff}
+.btn-danger{background:transparent;color:var(--danger);border:1px solid rgba(239,68,68,.3)}
+.btn-danger:hover{background:rgba(239,68,68,.1)}
+.btn-warn{background:var(--warn);color:#000}
+.err{color:var(--danger);font-size:12px;margin-top:8px}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px}
+.grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-bottom:24px}
+.stat-card{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:20px}
+.stat-val{font-size:28px;font-weight:600;font-family:var(--mono);margin-bottom:4px}
+.stat-label{font-size:12px;color:var(--muted);letter-spacing:.5px}
+.card{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.card-title{font-size:13px;font-weight:600;font-family:var(--mono);color:var(--text)}
+.section-title{font-size:11px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:12px;font-family:var(--mono)}
+.select{background:var(--bg-card2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-size:13px;outline:none;cursor:pointer;min-width:160px}
+.select:focus{border-color:var(--accent)}
+.tt-wrap{overflow-x:auto}
+.tt-table{border-collapse:collapse;width:100%;min-width:700px}
+.tt-table th{background:rgba(59,130,246,.08);border:1px solid var(--border);padding:10px 8px;font-size:11px;font-family:var(--mono);color:var(--accent);letter-spacing:.5px;text-align:center;white-space:nowrap}
+.tt-table td{border:1px solid var(--border);padding:8px;vertical-align:top;min-width:110px;min-height:60px}
+.tt-table td.day-cell{font-family:var(--mono);font-size:11px;color:var(--muted);background:rgba(0,0,0,.2);text-align:center;vertical-align:middle;font-weight:700;letter-spacing:1px}
+.cell-inner{background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.2);border-radius:6px;padding:6px 8px;font-size:11px}
+.cell-inner.is-lab{background:rgba(139,92,246,.1);border-color:rgba(139,92,246,.2)}
+.cell-inner.published{background:rgba(16,185,129,.1);border-color:rgba(16,185,129,.2)}
+.cell-code{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--accent);margin-bottom:2px}
+.cell-code.is-lab{color:var(--accent3)}
+.cell-code.published{color:var(--success)}
+.cell-teacher{font-size:10px;color:var(--muted)}
+.cell-room{font-size:10px;color:var(--accent2)}
+.empty-cell{color:var(--muted);opacity:.2;font-size:18px;text-align:center;padding:12px 0}
+.conflict-item{background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.2);border-radius:8px;padding:12px;margin-bottom:8px}
+.conflict-type{font-size:11px;font-family:var(--mono);color:var(--danger);margin-bottom:4px}
+.conflict-detail{font-size:12px;color:var(--muted)}
+.conflict-suggest{font-size:11px;color:var(--warn);margin-top:4px;font-style:italic}
+.status-dot{width:6px;height:6px;border-radius:50%;display:inline-block;margin-right:6px}
+.dot-draft{background:var(--warn)}
+.dot-pub{background:var(--success)}
+.badge{font-size:10px;padding:2px 8px;border-radius:20px;font-family:var(--mono)}
+.badge-draft{background:rgba(245,158,11,.1);color:var(--warn);border:1px solid rgba(245,158,11,.2)}
+.badge-pub{background:rgba(16,185,129,.1);color:var(--success);border:1px solid rgba(16,185,129,.2)}
+.loader{display:inline-block;width:14px;height:14px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.flex-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.spacer{flex:1}
+.divider{border:none;border-top:1px solid var(--border);margin:16px 0}
+.notice{background:rgba(6,182,212,.06);border:1px solid rgba(6,182,212,.15);border-radius:8px;padding:12px 14px;font-size:12px;color:#67e8f9;margin-bottom:16px}
+.notice.warn{background:rgba(245,158,11,.06);border-color:rgba(245,158,11,.15);color:var(--warn)}
+.notice.success{background:rgba(16,185,129,.06);border-color:rgba(16,185,129,.15);color:var(--success)}
+.api-url{font-family:var(--mono);font-size:11px;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:6px;padding:4px 8px;color:var(--muted);margin-bottom:12px;display:block;word-break:break-all}
+.empty-state{text-align:center;padding:40px;color:var(--muted);font-size:13px}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const {useState, useEffect, useCallback} = React;
+
+const API = 'http://localhost:8000/api';
+
+const DAYS = ['Monday','Tuesday','Wednesday','Thursday','Friday'];
+const SLOTS = [
+  {index:0,label:'08:00-09:00'},
+  {index:1,label:'09:00-10:00'},
+  {index:2,label:'10:00-11:00'},
+  {index:3,label:'11:00-12:00'},
+  {index:4,label:'12:00-13:00'},
+  {index:5,label:'14:00-15:00'},
+  {index:6,label:'15:00-16:00'},
+  {index:7,label:'16:00-17:00'},
+];
+
+function useToken(){
+  const [tok, setTok] = useState(()=>localStorage.getItem('tt_token')||'');
+  const save = t => { localStorage.setItem('tt_token',t); setTok(t); };
+  const clear = () => { localStorage.removeItem('tt_token'); setTok(''); };
+  return [tok, save, clear];
+}
+
+async function apiFetch(path, opts={}, token=''){
+  const headers = {'Content-Type':'application/json'};
+  if(token) headers['Authorization'] = `Bearer ${token}`;
+  const r = await fetch(`${API}${path}`, {...opts, headers: {...headers, ...(opts.headers||{})}});
+  if(!r.ok){
+    const e = await r.json().catch(()=>({detail:'Request failed'}));
+    throw new Error(e.detail||'Error');
+  }
+  return r.json();
+}
+
+function LoginPage({onLogin}){
+  const [pw, setPw] = useState('');
+  const [err, setErr] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const submit = async () => {
+    if(!pw) return;
+    setLoading(true); setErr('');
+    try {
+      const d = await apiFetch('/auth/login', {method:'POST', body: JSON.stringify({password:pw})});
+      onLogin(d.access_token);
+    } catch(e){ setErr(e.message); }
+    setLoading(false);
+  };
+
+  return (
+    <div className="login-wrap">
+      <div className="login-card">
+        <div className="login-title">GIKI_TT</div>
+        <div className="login-sub">Timetable Management System — Admin Access</div>
+        <div className="field-label">Password</div>
+        <input className="field-input" type="password" value={pw} onChange={e=>setPw(e.target.value)}
+          onKeyDown={e=>e.key==='Enter'&&submit()} placeholder="Enter admin password" style={{marginBottom:'16px'}} />
+        {err && <div className="err">{err}</div>}
+        <button className="btn btn-primary" style={{width:'100%',marginTop:'16px'}} onClick={submit} disabled={loading}>
+          {loading ? <span className="loader"/> : 'Sign In'}
+        </button>
+        <div style={{marginTop:'20px',padding:'12px',background:'rgba(59,130,246,.06)',borderRadius:'8px',fontSize:'11px',color:'var(--muted)'}}>
+          <span style={{fontFamily:'var(--mono)',color:'var(--accent2)'}}>POST</span> {API}/auth/login
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SchedulerPanel({token, batches}){
+  const [scope, setScope] = useState('batch');
+  const [batchId, setBatchId] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [msg, setMsg] = useState(null);
+  const [action, setAction] = useState('generate');
+
+  const run = async () => {
+    if(!batchId) return;
+    setLoading(true); setMsg(null);
+    try {
+      if(action==='generate'){
+        const d = await apiFetch(`/scheduler/generate?scope=${scope}&id=${batchId}`, {method:'POST'}, token);
+        setMsg({type:'success', text: JSON.stringify(d, null, 2)});
+      } else if(action==='publish'){
+        await apiFetch(`/scheduler/publish/${batchId}`, {method:'POST'}, token);
+        setMsg({type:'success', text:`Batch ${batchId} published successfully.`});
+      } else if(action==='clear'){
+        await apiFetch(`/scheduler/clear/${batchId}?force=false`, {method:'DELETE'}, token);
+        setMsg({type:'warn', text:`Draft schedule for batch ${batchId} cleared.`});
+      }
+    } catch(e){ setMsg({type:'err', text:e.message}); }
+    setLoading(false);
+  };
+
+  return (
+    <div>
+      <div className="grid-3" style={{marginBottom:'0'}}>
+        <div className="stat-card">
+          <div className="stat-label" style={{marginBottom:'8px'}}>Action</div>
+          <select className="select" style={{width:'100%'}} value={action} onChange={e=>setAction(e.target.value)}>
+            <option value="generate">Generate Schedule</option>
+            <option value="publish">Publish Draft</option>
+            <option value="clear">Clear Drafts</option>
+          </select>
+        </div>
+        <div className="stat-card">
+          <div className="stat-label" style={{marginBottom:'8px'}}>Scope</div>
+          <select className="select" style={{width:'100%'}} value={scope} onChange={e=>setScope(e.target.value)}>
+            <option value="batch">Batch</option>
+            <option value="department">Department</option>
+            <option value="faculty">Faculty</option>
+          </select>
+        </div>
+        <div className="stat-card">
+          <div className="stat-label" style={{marginBottom:'8px'}}>Batch ID</div>
+          <select className="select" style={{width:'100%'}} value={batchId} onChange={e=>setBatchId(e.target.value)}>
+            <option value="">Select batch...</option>
+            {batches.map(b=><option key={b.id} value={b.id}>{b.name||`Batch ${b.id}`}</option>)}
+          </select>
+        </div>
+      </div>
+      <div style={{marginTop:'16px',display:'flex',gap:'8px',flexWrap:'wrap'}}>
+        <button className={`btn ${action==='clear'?'btn-danger':action==='publish'?'btn-success':'btn-primary'}`}
+          onClick={run} disabled={loading||!batchId}>
+          {loading ? <span className="loader"/> : action==='generate'?'Run Scheduler':action==='publish'?'Publish':'Clear Drafts'}
+        </button>
+        {msg && <button className="btn btn-ghost btn-sm" onClick={()=>setMsg(null)}>Dismiss</button>}
+      </div>
+      {msg && (
+        <div className={`notice ${msg.type==='success'?'success':msg.type==='warn'?'warn':''}`} style={{marginTop:'16px',fontFamily:msg.type==='success'&&msg.text.startsWith('{')?'var(--mono)':'inherit',fontSize:'11px',whiteSpace:'pre-wrap'}}>
+          {msg.type==='err'?'Error: ':''}{msg.text}
+        </div>
+      )}
+      <div className="notice" style={{marginTop:'16px'}}>
+        Generate uses CSP backtracking with a 28s timeout. Scope determines whether to schedule a single batch, entire department, or faculty.
+      </div>
+    </div>
+  );
+}
+
+function TimetableView({token, batches}){
+  const [batchId, setBatchId] = useState('');
+  const [grid, setGrid] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [err, setErr] = useState('');
+
+  const load = async () => {
+    if(!batchId) return;
+    setLoading(true); setErr(''); setGrid(null);
+    try {
+      const d = await apiFetch(`/timetable/${batchId}`, {}, token);
+      setGrid(d.grid);
+    } catch(e){ setErr(e.message); }
+    setLoading(false);
+  };
+
+  const exportPdf = () => {
+    const a = document.createElement('a');
+    a.href = `${API}/export/pdf/${batchId}`;
+    a.target = '_blank';
+    a.click();
+  };
+
+  const hasPublished = grid && Object.values(grid).some(c=>c.status==='published');
+  const hasDraft = grid && Object.values(grid).some(c=>c.status==='draft');
+
+  return (
+    <div>
+      <div className="flex-row" style={{marginBottom:'16px'}}>
+        <select className="select" value={batchId} onChange={e=>setBatchId(e.target.value)}>
+          <option value="">Select batch...</option>
+          {batches.map(b=><option key={b.id} value={b.id}>{b.name||`Batch ${b.id}`}</option>)}
+        </select>
+        <button className="btn btn-primary btn-sm" onClick={load} disabled={loading||!batchId}>
+          {loading ? <span className="loader"/> : 'Load'}
+        </button>
+        {grid && batchId && (
+          <button className="btn btn-ghost btn-sm" onClick={exportPdf}>Export PDF</button>
+        )}
+        <div className="spacer"/>
+        {grid && (
+          <div className="flex-row" style={{gap:'12px'}}>
+            {hasDraft && <span className="badge badge-draft"><span className="status-dot dot-draft"/>Draft</span>}
+            {hasPublished && <span className="badge badge-pub"><span className="status-dot dot-pub"/>Published</span>}
+          </div>
+        )}
+      </div>
+      {err && <div className="err" style={{marginBottom:'12px'}}>{err}</div>}
+      {grid && (
+        <div className="tt-wrap">
+          <table className="tt-table">
+            <thead>
+              <tr>
+                <th style={{width:'80px'}}>Day</th>
+                {SLOTS.map(s=><th key={s.index}>{s.label}</th>)}
+              </tr>
+            </thead>
+            <tbody>
+              {DAYS.map(day=>(
+                <tr key={day}>
+                  <td className="day-cell">{day.slice(0,3).toUpperCase()}</td>
+                  {SLOTS.map(s=>{
+                    const key = `${day}_${s.index}`;
+                    const cell = grid[key];
+                    if(!cell) return <td key={s.index}><div className="empty-cell">·</div></td>;
+                    const pub = cell.status==='published';
+                    return (
+                      <td key={s.index}>
+                        <div className={`cell-inner ${cell.is_lab?'is-lab':''} ${pub?'published':''}`}>
+                          <div className={`cell-code ${cell.is_lab?'is-lab':''} ${pub?'published':''}`}>
+                            {cell.course_code}{cell.cross_listed_code?` / ${cell.cross_listed_code}`:''}
+                            {cell.is_lab && <span style={{fontSize:'9px',marginLeft:'4px',opacity:.7}}>LAB</span>}
+                          </div>
+                          <div style={{fontSize:'10px',color:'var(--text)',opacity:.8,margin:'1px 0'}}>{cell.course_name}</div>
+                          <div className="cell-teacher">{cell.teacher}</div>
+                          <div className="cell-room">{cell.room}</div>
+                        </div>
+                      </td>
+                    );
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+      {!grid && !loading && (
+        <div className="empty-state">Select a batch and click Load to view the timetable</div>
+      )}
+    </div>
+  );
+}
+
+function ConflictsView({token, batches}){
+  const [batchId, setBatchId] = useState('');
+  const [conflicts, setConflicts] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  const load = async () => {
+    if(!batchId) return;
+    setLoading(true);
+    try {
+      const d = await apiFetch(`/conflicts/${batchId}`, {}, token);
+      setConflicts(d.conflicts);
+    } catch(e){ setConflicts([]); }
+    setLoading(false);
+  };
+
+  return (
+    <div>
+      <div className="flex-row" style={{marginBottom:'16px'}}>
+        <select className="select" value={batchId} onChange={e=>setBatchId(e.target.value)}>
+          <option value="">Select batch...</option>
+          {batches.map(b=><option key={b.id} value={b.id}>{b.name||`Batch ${b.id}`}</option>)}
+        </select>
+        <button className="btn btn-primary btn-sm" onClick={load} disabled={loading||!batchId}>
+          {loading ? <span className="loader"/> : 'Check'}
+        </button>
+      </div>
+      {conflicts !== null && (
+        conflicts.length === 0
+          ? <div className="notice success">No conflicts detected in this batch schedule.</div>
+          : conflicts.map((c,i)=>(
+            <div className="conflict-item" key={i}>
+              <div className="conflict-type">{c.type.toUpperCase().replace(/_/g,' ')}</div>
+              <div className="conflict-detail">
+                {c.day} · Slot {c.slot} · {c.course_a} vs {c.course_b}
+              </div>
+              {c.suggestion && <div className="conflict-suggest">Suggestion: {c.suggestion}</div>}
+            </div>
+          ))
+      )}
+      {conflicts === null && !loading && (
+        <div className="empty-state">Select a batch and check for scheduling conflicts</div>
+      )}
+    </div>
+  );
+}
+
+function EntityTable({token, entity}){
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(()=>{
+    apiFetch(`/${entity}`, {}, token)
+      .then(d=>setData(Array.isArray(d)?d:[]))
+      .catch(()=>setData([]))
+      .finally(()=>setLoading(false));
+  }, [entity, token]);
+
+  if(loading) return <div style={{padding:'20px',textAlign:'center'}}><span className="loader"/></div>;
+  if(!data.length) return <div className="empty-state">No {entity} found</div>;
+
+  const keys = Object.keys(data[0]).filter(k=>k!=='hashed_password');
+  return (
+    <div style={{overflowX:'auto'}}>
+      <table style={{width:'100%',borderCollapse:'collapse',fontSize:'12px'}}>
+        <thead>
+          <tr>
+            {keys.map(k=>(
+              <th key={k} style={{textAlign:'left',padding:'8px 12px',borderBottom:'1px solid var(--border)',color:'var(--muted)',fontFamily:'var(--mono)',fontSize:'10px',letterSpacing:'1px',whiteSpace:'nowrap'}}>
+                {k.toUpperCase()}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {data.map((row,i)=>(
+            <tr key={i} style={{borderBottom:'1px solid rgba(42,53,80,.5)'}}>
+              {keys.map(k=>(
+                <td key={k} style={{padding:'8px 12px',color: k==='id'?'var(--muted)':k.includes('name')||k.includes('code')?'var(--text)':'var(--muted)',fontFamily:k==='id'||k==='code'?'var(--mono)':'inherit'}}>
+                  {String(row[k] ?? '—')}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+const NAV = [
+  {id:'dashboard', label:'Dashboard'},
+  {id:'timetable', label:'Timetable'},
+  {id:'scheduler', label:'Scheduler'},
+  {id:'conflicts', label:'Conflicts'},
+  {id:'faculties', label:'Faculties'},
+  {id:'departments', label:'Departments'},
+  {id:'batches', label:'Batches'},
+  {id:'teachers', label:'Teachers'},
+  {id:'rooms', label:'Rooms'},
+  {id:'courses', label:'Courses'},
+];
+
+const NAV_ICONS = {
+  dashboard:'⊞', timetable:'▦', scheduler:'⚙', conflicts:'⚠',
+  faculties:'🏛', departments:'◈', batches:'◉', teachers:'◎', rooms:'▣', courses:'◆'
+};
+
+function Dashboard({token, batches, stats}){
+  return (
+    <div>
+      <div className="grid-3">
+        <div className="stat-card"><div className="stat-val" style={{color:'var(--accent)'}}>{stats.batches}</div><div className="stat-label">Batches</div></div>
+        <div className="stat-card"><div className="stat-val" style={{color:'var(--accent3)'}}>{stats.teachers}</div><div className="stat-label">Teachers</div></div>
+        <div className="stat-card"><div className="stat-val" style={{color:'var(--accent2)'}}>{stats.rooms}</div><div className="stat-label">Rooms</div></div>
+        <div className="stat-card"><div className="stat-val" style={{color:'var(--success)'}}>{stats.courses}</div><div className="stat-label">Courses</div></div>
+        <div className="stat-card"><div className="stat-val" style={{color:'var(--warn)'}}>{stats.departments}</div><div className="stat-label">Departments</div></div>
+        <div className="stat-card"><div className="stat-val" style={{color:'#f472b6'}}>{stats.faculties}</div><div className="stat-label">Faculties</div></div>
+      </div>
+      <div className="card">
+        <div className="card-header"><div className="card-title">API Endpoints</div></div>
+        {['/auth/login','/timetable/{batch_id}','/scheduler/generate','/scheduler/publish/{id}','/scheduler/clear/{id}','/conflicts/{batch_id}','/export/pdf/{batch_id}'].map(ep=>(
+          <code key={ep} className="api-url">{API}{ep}</code>
+        ))}
+      </div>
+      <div className="notice">
+        Backend running on localhost:8000. All routes require Bearer token auth.
+      </div>
+    </div>
+  );
+}
+
+function App(){
+  const [token, saveToken, clearToken] = useToken();
+  const [page, setPage] = useState('dashboard');
+  const [batches, setBatches] = useState([]);
+  const [stats, setStats] = useState({batches:0,teachers:0,rooms:0,courses:0,departments:0,faculties:0});
+
+  useEffect(()=>{
+    if(!token) return;
+    const entities = ['batches','teachers','rooms','courses','departments','faculties'];
+    entities.forEach(e=>{
+      apiFetch(`/${e}`, {}, token)
+        .then(d=>{ if(Array.isArray(d)){ setStats(s=>({...s,[e]:d.length})); if(e==='batches') setBatches(d); }})
+        .catch(()=>{});
+    });
+  }, [token]);
+
+  if(!token){
+    return (
+      <div className="app" style={{justifyContent:'center',alignItems:'center'}}>
+        <LoginPage onLogin={saveToken} />
+      </div>
+    );
+  }
+
+  const ENTITY_PAGES = ['faculties','departments','batches','teachers','rooms','courses'];
+
+  return (
+    <div className="app">
+      <div className="sidebar">
+        <div className="sidebar-logo">
+          <div className="logo-text">GIKI_TT</div>
+          <div className="logo-sub">TIMETABLE SYSTEM</div>
+        </div>
+        <div className="nav">
+          {NAV.map(n=>(
+            <div key={n.id} className={`nav-item ${page===n.id?'active':''}`} onClick={()=>setPage(n.id)}>
+              <span style={{fontSize:'14px'}}>{NAV_ICONS[n.id]}</span>
+              <span>{n.label}</span>
+            </div>
+          ))}
+        </div>
+        <div className="sidebar-bottom">
+          <div className="auth-pill" onClick={clearToken}>✓ Authenticated · Logout</div>
+        </div>
+      </div>
+      <div className="main">
+        <div className="topbar">
+          <div className="page-title">{NAV.find(n=>n.id===page)?.label?.toUpperCase()}</div>
+          <div style={{fontSize:'11px',color:'var(--muted)',fontFamily:'var(--mono)'}}>GIK Institute of Engineering</div>
+        </div>
+        <div className="content">
+          {page==='dashboard' && <Dashboard token={token} batches={batches} stats={stats}/>}
+          {page==='timetable' && (
+            <div className="card">
+              <div className="card-header"><div className="card-title">Timetable Grid</div></div>
+              <TimetableView token={token} batches={batches}/>
+            </div>
+          )}
+          {page==='scheduler' && (
+            <div className="card">
+              <div className="card-header"><div className="card-title">Schedule Generator</div></div>
+              <SchedulerPanel token={token} batches={batches}/>
+            </div>
+          )}
+          {page==='conflicts' && (
+            <div className="card">
+              <div className="card-header"><div className="card-title">Conflict Detector</div></div>
+              <ConflictsView token={token} batches={batches}/>
+            </div>
+          )}
+          {ENTITY_PAGES.includes(page) && (
+            <div className="card">
+              <div className="card-header"><div className="card-title">{page.charAt(0).toUpperCase()+page.slice(1)}</div></div>
+              <EntityTable token={token} entity={page}/>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
