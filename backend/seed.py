@@ -1,64 +1,70 @@
 from database import SessionLocal, engine, Base
+import models.faculty, models.department, models.batch
+import models.teacher, models.room, models.course, models.schedule
 from models.faculty import Faculty
 from models.department import Department
-from models.batch import Batch
-from models.teacher import Teacher
-from models.room import Room
-from models.course import Course
-import models  # ensure all models are imported so Base knows them
+
 
 def seed():
     Base.metadata.create_all(bind=engine)
     db = SessionLocal()
 
-    # Faculties
-    fcse = Faculty(name="Faculty of Computer Science & Engineering", code="FCSE")
-    ee   = Faculty(name="Faculty of Electrical Engineering", code="EE")
-    db.add_all([fcse, ee])
+    if db.query(Faculty).count() > 0:
+        print("Already seeded. Skipping.")
+        db.close()
+        return
+
+    # ── FACULTIES ────────────────────────────────────────────────
+    fcse = Faculty(name="Faculty of Computer Science & Engineering",   code="FCSE")
+    fee  = Faculty(name="Faculty of Electrical Engineering",           code="FEE")
+    fbs  = Faculty(name="Faculty of Basic Sciences",                   code="FBS")
+    fme  = Faculty(name="Faculty of Mechanical Engineering",           code="FME")
+    fmce = Faculty(name="Faculty of Materials & Chemical Engineering", code="FMCE")
+    fcv  = Faculty(name="Faculty of Civil Engineering",                code="FCV")
+    db.add_all([fcse, fee, fbs, fme, fmce, fcv])
     db.commit()
 
-    # Departments
-    cs = Department(name="Computer Science", faculty_id=fcse.id,
-                    lab_day="Monday", lab_window="morning")
-    db.add(cs)
-    db.commit()
+    # ── DEPARTMENTS ──────────────────────────────────────────────
 
-    # Batches
-    b1 = Batch(year=1, dept_id=cs.id, student_count=60, section_label="CS LH1")
-    b2 = Batch(year=2, dept_id=cs.id, student_count=55, section_label="CS LH2")
-    db.add_all([b1, b2])
-    db.commit()
+    # FCSE — 6 departments
+    cs  = Department(name="Computer Science",        faculty_id=fcse.id, lab_day="Monday",    lab_window="morning")
+    cyb = Department(name="Cyber Security",          faculty_id=fcse.id, lab_day="Tuesday",   lab_window="morning")
+    ds  = Department(name="Data Science",            faculty_id=fcse.id, lab_day="Wednesday", lab_window="morning")
+    ai  = Department(name="Artificial Intelligence", faculty_id=fcse.id, lab_day="Thursday",  lab_window="morning")
+    cpe = Department(name="Computer Engineering",    faculty_id=fcse.id, lab_day="Monday",    lab_window="afternoon")
+    swe = Department(name="Software Engineering",    faculty_id=fcse.id, lab_day="Tuesday",   lab_window="afternoon")
 
-    # Rooms
-    lh1  = Room(name="CS LH1",   type="lecture_hall", capacity=80,  faculty_id=fcse.id)
-    lh2  = Room(name="CS LH2",   type="lecture_hall", capacity=80,  faculty_id=fcse.id)
-    lab1 = Room(name="CS Lab 1", type="lab_room",     capacity=40,  faculty_id=fcse.id)
-    db.add_all([lh1, lh2, lab1])
-    db.commit()
+    # FEE — 1 department
+    ee  = Department(name="Electrical Engineering",  faculty_id=fee.id,  lab_day="Wednesday", lab_window="morning")
 
-    # Teachers
-    t1 = Teacher(name="Dr. Omer Bin Saeed", dept_id=cs.id)
-    t2 = Teacher(name="Said Nabi",          dept_id=cs.id)
-    t3 = Teacher(name="Dr. Zoya",           dept_id=cs.id)
-    db.add_all([t1, t2, t3])
-    db.commit()
+    # FBS — 1 department
+    bsc = Department(name="Basic Sciences",          faculty_id=fbs.id,  lab_day="Thursday",  lab_window="morning")
 
-    # Courses (Year 1 batch)
-    c1 = Course(name="Data Structures",    code="CS232",   credit_hours=3,
-                is_lab=False, batch_id=b1.id, teacher_id=t1.id, dept_id=cs.id)
-    c2 = Course(name="Calculus",           code="MATH101", credit_hours=3,
-                is_lab=False, batch_id=b1.id, teacher_id=t2.id, dept_id=cs.id)
-    c3 = Course(name="Programming Lab",    code="CS232-L", credit_hours=1,
-                is_lab=True,  batch_id=b1.id, teacher_id=t3.id, dept_id=cs.id)
-    db.add_all([c1, c2, c3])
-    db.commit()
+    # FME — 1 department
+    mec = Department(name="Mechanical Engineering",  faculty_id=fme.id,  lab_day="Monday",    lab_window="afternoon")
 
-    # Link lab to lecture
-    c1.lab_course_id = c3.id
+    # FMCE — 2 departments
+    che = Department(name="Chemical Engineering",    faculty_id=fmce.id, lab_day="Tuesday",   lab_window="afternoon")
+    mat = Department(name="Materials Engineering",   faculty_id=fmce.id, lab_day="Wednesday", lab_window="afternoon")
+
+    # FCV — 1 department
+    civ = Department(name="Civil Engineering",       faculty_id=fcv.id,  lab_day="Thursday",  lab_window="afternoon")
+
+    db.add_all([cs, cyb, ds, ai, cpe, swe, ee, bsc, mec, che, mat, civ])
     db.commit()
 
     print("Seed complete.")
+    print(f"Faculties:   {db.query(Faculty).count()}")
+    print(f"Departments: {db.query(Department).count()}")
+    print()
+    print("Next steps:")
+    print("  1. POST /api/upload/rooms     — upload rooms.xlsx  (BB excluded automatically)")
+    print("  2. POST /api/batches/         — add batches per dept (year 1-4, section_label, student_count)")
+    print("  3. POST /api/teachers/        — add teachers per dept")
+    print("  4. POST /api/upload/courses   — upload courses.xlsx")
+    print("  5. POST /api/scheduler/generate — generate timetable")
     db.close()
+
 
 if __name__ == "__main__":
     seed()

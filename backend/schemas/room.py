@@ -1,10 +1,12 @@
 from pydantic import BaseModel
+from typing import Optional
 
 class RoomBase(BaseModel):
     name: str
     type: str
     capacity: int
-    faculty_id: int
+    building: Optional[str] = None
+    faculty_id: Optional[int] = None
 
 class RoomCreate(RoomBase):
     pass
