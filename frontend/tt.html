@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8" />
+<script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:#0a0e1a;color:#e2e8f0;min-height:100vh}
+:root{
+  --bg-deep:#0a0e1a;
+  --bg-card:#111827;
+  --bg-card2:#1a2235;
+  --border:#2a3550;
+  --accent:#3b82f6;
+  --accent2:#06b6d4;
+  --accent3:#8b5cf6;
+  --success:#10b981;
+  --warn:#f59e0b;
+  --danger:#ef4444;
+  --text:#e2e8f0;
+  --muted:#6b7280;
+  --mono:'Space Mono',monospace;
+}
+.app{display:flex;height:100vh;overflow:hidden}
+.sidebar{width:220px;background:var(--bg-card);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0}
+.sidebar-logo{padding:20px 16px;border-bottom:1px solid var(--border)}
+.logo-text{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--accent);letter-spacing:2px}
+.logo-sub{font-size:10px;color:var(--muted);margin-top:2px;letter-spacing:1px}
+.nav{padding:12px 8px;flex:1;overflow-y:auto}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;cursor:pointer;font-size:13px;color:var(--muted);margin-bottom:2px;transition:all .15s}
+.nav-item:hover{background:var(--bg-card2);color:var(--text)}
+.nav-item.active{background:rgba(59,130,246,.12);color:var(--accent);border:1px solid rgba(59,130,246,.2)}
+.sidebar-bottom{padding:12px;border-top:1px solid var(--border)}
+.auth-pill{background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.2);border-radius:20px;padding:6px 12px;font-size:11px;color:var(--success);font-family:var(--mono);cursor:pointer}
+.main{flex:1;overflow:auto;display:flex;flex-direction:column}
+.topbar{padding:16px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--bg-card);flex-shrink:0}
+.page-title{font-size:15px;font-weight:600;font-family:var(--mono);letter-spacing:.5px}
+.content{padding:24px;flex:1}
+.login-wrap{display:flex;align-items:center;justify-content:center;height:100%;min-height:400px}
+.login-card{background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:40px;width:340px}
+.login-title{font-family:var(--mono);font-size:18px;color:var(--accent);margin-bottom:6px}
+.login-sub{font-size:13px;color:var(--muted);margin-bottom:28px}
+.field-label{font-size:11px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;font-family:var(--mono)}
+.field-input{width:100%;background:var(--bg-card2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-size:14px;outline:none;transition:border .15s}
+.field-input:focus{border-color:var(--accent)}
+.btn{padding:10px 20px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;border:none;font-family:'DM Sans',sans-serif}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{background:#2563eb}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed}
+.btn-sm{padding:6px 12px;font-size:12px}
+.btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--border)}
+.btn-ghost:hover{color:var(--text);border-color:var(--accent)}
+.btn-success{background:var(--success);color:#fff}
+.btn-danger{background:transparent;color:var(--danger);border:1px solid rgba(239,68,68,.3)}
+.btn-danger:hover{background:rgba(239,68,68,.1)}
+.btn-warn{background:var(--warn);color:#000}
+.err{color:var(--danger);font-size:12px;margin-top:8px}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px}
+.grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-bottom:24px}
+.stat-card{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:20px}
+.stat-val{font-size:28px;font-weight:600;font-family:var(--mono);margin-bottom:4px}
+.stat-label{font-size:12px;color:var(--muted);letter-spacing:.5px}
+.card{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.card-title{font-size:13px;font-weight:600;font-family:var(--mono);color:var(--text)}
+.section-title{font-size:11px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:12px;font-family:var(--mono)}
+.select{background:var(--bg-card2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-size:13px;outline:none;cursor:pointer;min-width:160px}
+.select:focus{border-color:var(--accent)}
+/* Timetable */
+.tt-wrap{overflow-x:auto}
+.tt-table{border-collapse:collapse;width:100%;min-width:700px}
+.tt-table th{background:rgba(59,130,246,.08);border:1px solid var(--border);padding:10px 8px;font-size:11px;font-family:var(--mono);color:var(--accent);letter-spacing:.5px;text-align:center;white-space:nowrap}
+.tt-table td{border:1px solid var(--border);padding:6px;vertical-align:top;min-width:120px}
+.tt-table td.day-cell{font-family:var(--mono);font-size:11px;color:var(--muted);background:rgba(0,0,0,.2);text-align:center;vertical-align:middle;font-weight:700;letter-spacing:1px;width:60px}
+.cell-inner{background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.15);border-radius:6px;padding:6px 8px;font-size:11px;margin-bottom:4px}
+.cell-inner:last-child{margin-bottom:0}
+.cell-inner.is-lab{background:rgba(139,92,246,.08);border-color:rgba(139,92,246,.2)}
+.cell-inner.published{background:rgba(16,185,129,.08);border-color:rgba(16,185,129,.2)}
+.cell-code{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--accent);margin-bottom:1px}
+.cell-code.is-lab{color:var(--accent3)}
+.cell-code.published{color:var(--success)}
+.cell-name{font-size:10px;color:var(--text);opacity:.85;margin-bottom:1px;line-height:1.3}
+.cell-teacher{font-size:10px;color:var(--muted)}
+.cell-room{font-size:10px;color:var(--accent2)}
+.empty-cell{color:var(--muted);opacity:.15;font-size:16px;text-align:center;padding:10px 0}
+.conflict-item{background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.2);border-radius:8px;padding:12px;margin-bottom:8px}
+.conflict-type{font-size:11px;font-family:var(--mono);color:var(--danger);margin-bottom:4px}
+.conflict-detail{font-size:12px;color:var(--muted)}
+.conflict-suggest{font-size:11px;color:var(--warn);margin-top:4px;font-style:italic}
+.status-dot{width:6px;height:6px;border-radius:50%;display:inline-block;margin-right:6px}
+.dot-draft{background:var(--warn)}
+.dot-pub{background:var(--success)}
+.badge{font-size:10px;padding:2px 8px;border-radius:20px;font-family:var(--mono)}
+.badge-draft{background:rgba(245,158,11,.1);color:var(--warn);border:1px solid rgba(245,158,11,.2)}
+.badge-pub{background:rgba(16,185,129,.1);color:var(--success);border:1px solid rgba(16,185,129,.2)}
+.badge-lab{background:rgba(139,92,246,.1);color:var(--accent3);border:1px solid rgba(139,92,246,.2)}
+.badge-lec{background:rgba(59,130,246,.1);color:var(--accent);border:1px solid rgba(59,130,246,.2)}
+.loader{display:inline-block;width:14px;height:14px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.flex-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.spacer{flex:1}
+.divider{border:none;border-top:1px solid var(--border);margin:16px 0}
+.notice{background:rgba(6,182,212,.06);border:1px solid rgba(6,182,212,.15);border-radius:8px;padding:12px 14px;font-size:12px;color:#67e8f9;margin-bottom:16px}
+.notice.warn{background:rgba(245,158,11,.06);border-color:rgba(245,158,11,.15);color:var(--warn)}
+.notice.success{background:rgba(16,185,129,.06);border-color:rgba(16,185,129,.15);color:var(--success)}
+.notice.danger{background:rgba(239,68,68,.06);border-color:rgba(239,68,68,.2);color:var(--danger)}
+.api-url{font-family:var(--mono);font-size:11px;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:6px;padding:4px 8px;color:var(--muted);margin-bottom:8px;display:block;word-break:break-all}
+.empty-state{text-align:center;padding:40px;color:var(--muted);font-size:13px}
+.search-input{background:var(--bg-card2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-size:13px;outline:none;width:220px}
+.search-input:focus{border-color:var(--accent)}
+.tag{display:inline-block;font-size:10px;padding:1px 6px;border-radius:4px;font-family:var(--mono);margin-right:4px}
+.tag-cys{background:rgba(16,185,129,.1);color:var(--success)}
+.tag-cs{background:rgba(59,130,246,.1);color:var(--accent)}
+.tag-ee{background:rgba(245,158,11,.1);color:var(--warn)}
+.tag-me{background:rgba(239,68,68,.1);color:var(--danger)}
+.tag-other{background:rgba(107,114,128,.1);color:var(--muted)}
+.pill{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:12px;font-size:11px;border:1px solid var(--border);color:var(--muted);cursor:pointer;transition:all .15s}
+.pill:hover,.pill.active{background:rgba(59,130,246,.1);color:var(--accent);border-color:rgba(59,130,246,.3)}
+.tt-friday-note{font-size:10px;color:var(--warn);font-family:var(--mono);margin-bottom:8px;opacity:.8}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const {useState, useEffect, useMemo, useCallback} = React;
+
+const API = 'http://localhost:8000/api';
+
+// ── Real data from seed files ──────────────────────────────────────────────
+
+const DAYS = ['Monday','Tuesday','Wednesday','Thursday','Friday'];
+
+// Actual timeslots from timeslots.csv — note Friday has different times
+const TIMESLOTS = {
+  Monday:    [{id:'MON_S1',label:'08:00–08:50',idx:1},{id:'MON_S2',label:'09:00–09:50',idx:2},{id:'MON_S3',label:'10:30–11:20',idx:3},{id:'MON_S4',label:'11:30–12:20',idx:4},{id:'MON_S5',label:'12:30–13:20',idx:5},{id:'MON_S6',label:'14:30–15:20',idx:6},{id:'MON_S7',label:'15:30–16:20',idx:7},{id:'MON_S8',label:'16:30–17:20',idx:8}],
+  Tuesday:   [{id:'TUE_S1',label:'08:00–08:50',idx:1},{id:'TUE_S2',label:'09:00–09:50',idx:2},{id:'TUE_S3',label:'10:30–11:20',idx:3},{id:'TUE_S4',label:'11:30–12:20',idx:4},{id:'TUE_S5',label:'12:30–13:20',idx:5},{id:'TUE_S6',label:'14:30–15:20',idx:6},{id:'TUE_S7',label:'15:30–16:20',idx:7},{id:'TUE_S8',label:'16:30–17:20',idx:8}],
+  Wednesday: [{id:'WED_S1',label:'08:00–08:50',idx:1},{id:'WED_S2',label:'09:00–09:50',idx:2},{id:'WED_S3',label:'10:30–11:20',idx:3},{id:'WED_S4',label:'11:30–12:20',idx:4},{id:'WED_S5',label:'12:30–13:20',idx:5},{id:'WED_S6',label:'14:30–15:20',idx:6},{id:'WED_S7',label:'15:30–16:20',idx:7},{id:'WED_S8',label:'16:30–17:20',idx:8}],
+  Thursday:  [{id:'THU_S1',label:'08:00–08:50',idx:1},{id:'THU_S2',label:'09:00–09:50',idx:2},{id:'THU_S3',label:'10:30–11:20',idx:3},{id:'THU_S4',label:'11:30–12:20',idx:4},{id:'THU_S5',label:'12:30–13:20',idx:5},{id:'THU_S6',label:'14:30–15:20',idx:6},{id:'THU_S7',label:'15:30–16:20',idx:7},{id:'THU_S8',label:'16:30–17:20',idx:8}],
+  Friday:    [{id:'FRI_S1',label:'08:00–08:50',idx:1},{id:'FRI_S2',label:'09:00–09:50',idx:2},{id:'FRI_S3',label:'10:00–10:50',idx:3},{id:'FRI_S4',label:'11:00–11:50',idx:4},{id:'FRI_S5',label:'12:00–12:50',idx:5},{id:'FRI_S6',label:'14:30–15:20',idx:6},{id:'FRI_S7',label:'15:30–16:20',idx:7},{id:'FRI_S8',label:'16:30–17:20',idx:8}],
+};
+
+const ALL_SLOT_LABELS = ['08:00','09:00','10:30*','11:30*','12:30*','14:30','15:30','16:30'];
+
+const PROGRAMS = ['BAI','BCE','BCS','BDS','BEE','BES','BME','CME','CVE','CYS','EEE','EEP','ES','MGS','MTE','MTM','MTN','SE'];
+
+const COURSES_DATA = [
+  {code:'AF451',section:'A',title:'Accounting Information Systems',credits:3,type:'lecture',instructor:'Mr. Muhammad Ahmad Zaka',program:'MGS',capacity:20},
+  {code:'AF452',section:'A',title:'Auditing',credits:3,type:'lecture',instructor:'Mr. Muhammad Ahmad Zaka',program:'MGS',capacity:20},
+  {code:'AI201L',section:'A',title:'Programming for AI Lab 1',credits:1,type:'lab',instructor:'Abu Bakar Siddique',program:'BAI',capacity:50},
+  {code:'AI311',section:'A',title:'Knowledge Representation and Problem Solving',credits:2,type:'lecture',instructor:'Dr. Khurram',program:'BAI',capacity:55},
+  {code:'AI321',section:'A',title:'Machine Learning',credits:3,type:'lecture',instructor:'Dr. Ali Imran Sandhu',program:'BAI',capacity:55},
+  {code:'AI321L',section:'A',title:'Machine Learning Lab',credits:1,type:'lab',instructor:'Mr. Asim Shah',program:'BAI',capacity:55},
+  {code:'AI406L',section:'A',title:'Professional in AI Training Lab',credits:1,type:'lab',instructor:'Touqeer Abbas',program:'BAI',capacity:45},
+  {code:'AI423',section:'A',title:'Object Oriented Analysis and Design',credits:3,type:'lecture',instructor:'Mr. Hafiz Qasim',program:'BAI',capacity:30},
+  {code:'CE221',section:'A',title:'Digital Logic Design',credits:3,type:'lecture',instructor:'Dr. Adnan Shah',program:'BAI',capacity:50},
+  {code:'CE221',section:'B',title:'Digital Logic Design',credits:3,type:'lecture',instructor:'Dr. Waqar Ahmad',program:'BCE',capacity:40},
+  {code:'CE221',section:'C',title:'Digital Logic Design',credits:3,type:'lecture',instructor:'Mr. Ahsan Shah',program:'BCS',capacity:50},
+  {code:'CE221',section:'D',title:'Digital Logic Design',credits:3,type:'lecture',instructor:'Prof. Dr. Qadeer ul Hasan',program:'BDS',capacity:50},
+  {code:'CE221',section:'E',title:'Digital Logic Design',credits:3,type:'lecture',instructor:'Dr. Sahab Haider',program:'CYS',capacity:40},
+  {code:'CE221',section:'F',title:'Digital Logic Design',credits:3,type:'lecture',instructor:'Dr. Adnan Shah',program:'SE',capacity:50},
+  {code:'CS101',section:'G1',title:'Computing and AI',credits:2,type:'lecture',instructor:'Dr. Rashid Jillani',program:'CYS',capacity:55},
+  {code:'CS101',section:'G2',title:'Computing and AI',credits:2,type:'lecture',instructor:'Dr. Shahab Haider',program:'SE',capacity:55},
+  {code:'CS101',section:'H1',title:'Computing and AI',credits:2,type:'lecture',instructor:'Mr. Sajid',program:'BCS',capacity:50},
+  {code:'CS101',section:'I',title:'Computing and AI',credits:2,type:'lecture',instructor:'Ms. Rabbia Hassan',program:'BDS',capacity:60},
+  {code:'CS221',section:'A',title:'Data Structures and Algorithms',credits:3,type:'lecture',instructor:'Mr. Qasim Riaz',program:'BAI',capacity:50},
+  {code:'CS221',section:'B',title:'Data Structures and Algorithms',credits:3,type:'lecture',instructor:'Prof. Dr. Ahmar Rashid',program:'BCE',capacity:40},
+  {code:'CS221',section:'C',title:'Data Structures and Algorithms',credits:3,type:'lecture',instructor:'Dr. Qamar Abbas',program:'BCS',capacity:50},
+  {code:'CS221',section:'D',title:'Data Structures and Algorithms',credits:3,type:'lecture',instructor:'Prof. Dr. Masroor Hussain',program:'BDS',capacity:50},
+  {code:'CS221',section:'E',title:'Data Structures and Algorithms',credits:3,type:'lecture',instructor:'Dr. Zubair',program:'CYS',capacity:40},
+  {code:'CS221',section:'F',title:'Data Structures and Algorithms',credits:3,type:'lecture',instructor:'Mr. Said Nabi',program:'SE',capacity:50},
+  {code:'CS311',section:'A',title:'Operating Systems',credits:3,type:'lecture',instructor:'Dr. Sarah',program:'BAI',capacity:55},
+  {code:'CS311',section:'E',title:'Operating Systems',credits:3,type:'lecture',instructor:'Mr. Huzaifa',program:'CYS',capacity:40},
+  {code:'CS311',section:'F',title:'Operating Systems',credits:3,type:'lecture',instructor:'Mr. Huzaifa',program:'SE',capacity:45},
+  {code:'CS351',section:'E',title:'Artificial Intelligence',credits:3,type:'lecture',instructor:'Mr. Ahmed Nawaz',program:'CYS',capacity:40},
+  {code:'CS391',section:'E',title:'Entrepreneurship and Technology Commercialization',credits:3,type:'lecture',instructor:'TBA',program:'CYS',capacity:40},
+  {code:'CS391',section:'F',title:'Entrepreneurship and Technology Commercialization',credits:3,type:'lecture',instructor:'TBA',program:'SE',capacity:45},
+  {code:'CS478',section:'A',title:'Design and Analysis of Algorithms',credits:3,type:'lecture',instructor:'Mr. Ahsan Shah',program:'BAI',capacity:45},
+  {code:'CY331',section:'E',title:'Information Assurance',credits:3,type:'lecture',instructor:'Dr. Zain',program:'CYS',capacity:40},
+  {code:'CY451',section:'',title:'Vulnerability Assessment',credits:3,type:'lecture',instructor:'Mr. Ahmed Nawaz',program:'CYS',capacity:45},
+  {code:'CY451L',section:'',title:'Vulnerability Assessment Lab',credits:1,type:'lab',instructor:'Mr. Khizar Khan',program:'CYS',capacity:45},
+  {code:'CY482',section:'',title:'Design Project 2',credits:3,type:'lecture',instructor:'Ms. Laraib Afzal',program:'CYS',capacity:45},
+  {code:'CY4xx',section:'E',title:'Cyber Security Elective I',credits:3,type:'lecture',instructor:'Dr. Zubair',program:'CYS',capacity:45},
+  {code:'ES205',section:'B',title:'Advanced Linear Algebra',credits:3,type:'lecture',instructor:'Dr. Babar Zaman',program:'CYS',capacity:45},
+  {code:'HM101',section:'G',title:'Communication Skills',credits:2,type:'lecture',instructor:'Mr. Haseeb Ahsan',program:'CYS',capacity:100},
+  {code:'HM101',section:'H',title:'Communication Skills',credits:2,type:'lecture',instructor:'Ms. Hira Ahad',program:'BCS',capacity:100},
+  {code:'MT101',section:'G',title:'Calculus I',credits:3,type:'lecture',instructor:'Mr. Asif',program:'CYS',capacity:100},
+  {code:'MM101',section:'G',title:'Materials and Nanotechnology',credits:2,type:'lecture',instructor:'Dr. Hamza',program:'CYS',capacity:100},
+  {code:'PH101',section:'G',title:'Applied Physics',credits:3,type:'lecture',instructor:'Mr. Saqib',program:'CYS',capacity:100},
+  {code:'SE201',section:'F',title:'Software Engineering',credits:3,type:'lecture',instructor:'Ms. Laraib Afzal',program:'SE',capacity:50},
+  {code:'SE322',section:'',title:'Software Design and Architecture',credits:3,type:'lecture',instructor:'Mr. Said Nabi',program:'SE',capacity:45},
+  {code:'CS202',section:'E',title:'Information and Communication Technologies',credits:2,type:'lecture',instructor:'Dr. Zain',program:'CYS',capacity:40},
+  {code:'IF101L',section:'G',title:'Innovation and Makers Lab',credits:1,type:'lab',instructor:'Engr. Faheem Ahmed',program:'CYS',capacity:100},
+  {code:'CS481',section:'B',title:'Senior Design Project',credits:3,type:'lecture',instructor:'Mr. Usama Manzoor',program:'BCE',capacity:30},
+  {code:'ME404',section:'',title:'AI for Mechanical Engineers',credits:3,type:'lecture',instructor:'Engr. Shahab Alam',program:'BME',capacity:40},
+  {code:'EE414',section:'',title:'Renewable Energy Systems',credits:3,type:'lecture',instructor:'Dr. Ammar Arshad',program:'EEE',capacity:45},
+  {code:'MS490',section:'A',title:'Engineering Economics and Management',credits:3,type:'lecture',instructor:'Dr. M. Sabir',program:'EEE',capacity:70},
+];
+
+const ROOMS_DATA = [
+  {id:'CS_LH1',name:'CS LH1',building:'FCSE',type:'lecture_hall',capacity:80},
+  {id:'CS_LH2',name:'CS LH2',building:'FCSE',type:'lecture_hall',capacity:80},
+  {id:'CS_LH3',name:'CS LH3',building:'FCSE',type:'lecture_hall',capacity:80},
+  {id:'CS_LH4',name:'CS LH4',building:'FCSE',type:'lecture_hall',capacity:80},
+  {id:'EE_LH1',name:'EE LH1',building:'FEE',type:'lecture_hall',capacity:60},
+  {id:'EE_LH2',name:'EE LH2',building:'FEE',type:'lecture_hall',capacity:80},
+  {id:'EE_LH3',name:'EE LH3',building:'FEE',type:'lecture_hall',capacity:80},
+  {id:'EE_LH4',name:'EE LH4',building:'FEE',type:'lecture_hall',capacity:80},
+  {id:'EE_MAIN',name:'EE Main',building:'FEE',type:'main_hall',capacity:150},
+  {id:'FEE_QH1',name:'FEE Quiz Hall',building:'FEE',type:'lecture_hall',capacity:120},
+  {id:'ACB_LH1',name:'AcB LH1',building:'ACB',type:'lecture_hall',capacity:60},
+  {id:'ACB_LH2',name:'AcB LH2',building:'ACB',type:'lecture_hall',capacity:60},
+  {id:'ACB_LH3',name:'AcB LH3',building:'ACB',type:'lecture_hall',capacity:60},
+  {id:'ACB_LH4',name:'AcB LH4',building:'ACB',type:'lecture_hall',capacity:80},
+  {id:'ACB_LH5',name:'AcB LH5',building:'ACB',type:'lecture_hall',capacity:80},
+  {id:'ACB_LH6',name:'AcB LH6',building:'ACB',type:'lecture_hall',capacity:80},
+  {id:'ACB_LH7',name:'AcB LH7',building:'ACB',type:'lecture_hall',capacity:60},
+  {id:'ACB_LH8',name:'AcB LH8',building:'ACB',type:'lecture_hall',capacity:80},
+  {id:'ACB_MAIN1',name:'AcB Main1',building:'ACB',type:'main_hall',capacity:150},
+  {id:'ACB_MAIN2',name:'AcB Main2',building:'ACB',type:'main_hall',capacity:200},
+  {id:'ACB_AI_LAB',name:'ACB - AI Lab',building:'ACB',type:'lab',capacity:50},
+  {id:'ACB_CYS_LAB',name:'ACB - CYS Lab',building:'ACB',type:'lab',capacity:40},
+  {id:'ACB_DA_LAB',name:'ACB - DA Lab',building:'ACB',type:'lab',capacity:50},
+  {id:'BB_LH2',name:'BB LH2',building:'BB',type:'lecture_hall',capacity:80},
+  {id:'BB_EH1',name:'BB EH1',building:'BB',type:'lecture_hall',capacity:80},
+  {id:'BB_EH2',name:'BB EH2',building:'BB',type:'lecture_hall',capacity:80},
+  {id:'BB_PC_LAB',name:'BB PC Lab',building:'BB',type:'lab',capacity:60},
+  {id:'ME_LH1',name:'ME LH1',building:'FME',type:'lecture_hall',capacity:80},
+  {id:'ME_LH2',name:'ME LH2',building:'FME',type:'lecture_hall',capacity:80},
+  {id:'ME_MAIN',name:'ME Main',building:'FME',type:'main_hall',capacity:150},
+  {id:'MCE_LH1',name:'MCE LH1',building:'FMCE',type:'lecture_hall',capacity:60},
+  {id:'MCE_LH2',name:'MCE LH2',building:'FMCE',type:'lecture_hall',capacity:60},
+  {id:'MCE_MAIN',name:'MCE Main',building:'FMCE',type:'main_hall',capacity:150},
+  {id:'ES_LH1',name:'ES LH1',building:'FES',type:'lecture_hall',capacity:60},
+  {id:'ES_LH2',name:'ES LH2',building:'FES',type:'lecture_hall',capacity:60},
+  {id:'FES_PH_LAB',name:'FES - PH Lab',building:'FES',type:'lab',capacity:100},
+  {id:'FES_SE_LAB',name:'FES - SE Lab',building:'FES',type:'lab',capacity:60},
+  {id:'TBA_ROOM',name:'TBA',building:'TBA',type:'lab',capacity:999},
+];
+
+// ── API helpers ───────────────────────────────────────────────────────────
+
+function useToken(){
+  const [tok, setTok] = useState(()=>localStorage.getItem('tt_token')||'');
+  const save = t => { localStorage.setItem('tt_token',t); setTok(t); };
+  const clear = () => { localStorage.removeItem('tt_token'); setTok(''); };
+  return [tok, save, clear];
+}
+
+async function apiFetch(path, opts={}, token=''){
+  const headers = {'Content-Type':'application/json'};
+  if(token) headers['Authorization'] = `Bearer ${token}`;
+  const r = await fetch(`${API}${path}`, {...opts, headers: {...headers, ...(opts.headers||{})}});
+  if(!r.ok){
+    const e = await r.json().catch(()=>({detail:'Request failed'}));
+    throw new Error(e.detail||'Error');
+  }
+  return r.json();
+}
+
+// ── Login ─────────────────────────────────────────────────────────────────
+
+function LoginPage({onLogin}){
+  const [pw, setPw] = useState('');
+  const [err, setErr] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const submit = async () => {
+    if(!pw) return;
+    setLoading(true); setErr('');
+    try {
+      const d = await apiFetch('/auth/login', {method:'POST', body: JSON.stringify({password:pw})});
+      onLogin(d.access_token);
+    } catch(e){ setErr(e.message); }
+    setLoading(false);
+  };
+
+  return (
+    <div className="login-wrap">
+      <div className="login-card">
+        <div className="login-title">GIKI_TT</div>
+        <div className="login-sub">Timetable Management System — Admin Access</div>
+        <div className="field-label">Password</div>
+        <input className="field-input" type="password" value={pw} onChange={e=>setPw(e.target.value)}
+          onKeyDown={e=>e.key==='Enter'&&submit()} placeholder="Enter admin password" style={{marginBottom:'16px'}} />
+        {err && <div className="err">{err}</div>}
+        <button className="btn btn-primary" style={{width:'100%',marginTop:'16px'}} onClick={submit} disabled={loading}>
+          {loading ? <span className="loader"/> : 'Sign In'}
+        </button>
+        <div style={{marginTop:'20px',padding:'12px',background:'rgba(59,130,246,.06)',borderRadius:'8px',fontSize:'11px',color:'var(--muted)'}}>
+          <span style={{fontFamily:'var(--mono)',color:'var(--accent2)'}}>POST</span> {API}/auth/login
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Timetable View ────────────────────────────────────────────────────────
+
+function TimetableView({token, batches}){
+  const [batchId, setBatchId] = useState('');
+  const [program, setProgram] = useState('');
+  const [grid, setGrid] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [err, setErr] = useState('');
+  const [viewMode, setViewMode] = useState('grid'); // grid | list
+
+  const load = async () => {
+    if(!batchId && !program) return;
+    setLoading(true); setErr(''); setGrid(null);
+    try {
+      // Try batch endpoint first, fall back to program filter
+      const endpoint = batchId ? `/timetable/${batchId}` : `/timetable?program=${program}`;
+      const d = await apiFetch(endpoint, {}, token);
+      setGrid(d.grid || d);
+    } catch(e){ setErr(e.message); }
+    setLoading(false);
+  };
+
+  const exportPdf = () => {
+    const id = batchId || program;
+    window.open(`${API}/export/pdf/${id}`, '_blank');
+  };
+
+  const hasPublished = grid && Object.values(grid).some(c=>c&&c.status==='published');
+  const hasDraft = grid && Object.values(grid).some(c=>c&&c.status==='draft');
+
+  return (
+    <div>
+      <div className="flex-row" style={{marginBottom:'16px'}}>
+        {batches.length > 0 && (
+          <select className="select" value={batchId} onChange={e=>{setBatchId(e.target.value);setProgram('')}}>
+            <option value="">Select batch...</option>
+            {batches.map(b=><option key={b.id} value={b.id}>{b.name||`Batch ${b.id}`}</option>)}
+          </select>
+        )}
+        <select className="select" value={program} onChange={e=>{setProgram(e.target.value);setBatchId('')}}>
+          <option value="">— or filter by program —</option>
+          {PROGRAMS.map(p=><option key={p} value={p}>{p}</option>)}
+        </select>
+        <button className="btn btn-primary btn-sm" onClick={load} disabled={loading||(!batchId&&!program)}>
+          {loading ? <span className="loader"/> : 'Load'}
+        </button>
+        {grid && <button className="btn btn-ghost btn-sm" onClick={exportPdf}>Export PDF</button>}
+        <div className="spacer"/>
+        {grid && (
+          <div className="flex-row" style={{gap:'12px'}}>
+            {hasDraft && <span className="badge badge-draft"><span className="status-dot dot-draft"/>Draft</span>}
+            {hasPublished && <span className="badge badge-pub"><span className="status-dot dot-pub"/>Published</span>}
+          </div>
+        )}
+      </div>
+      {err && <div className="notice danger" style={{marginBottom:'12px'}}>{err}</div>}
+
+      {/* Friday note */}
+      {grid && <div className="tt-friday-note">⚠ Friday slots 3–5 run 10:00–12:50 (Jumu'ah adjusted). Slots 1–2 and 6–8 are same as Mon–Thu.</div>}
+
+      {grid ? (
+        <div className="tt-wrap">
+          <table className="tt-table">
+            <thead>
+              <tr>
+                <th style={{width:'64px'}}>Day</th>
+                {ALL_SLOT_LABELS.map((l,i)=>(
+                  <th key={i}><div>{l}</div><div style={{fontWeight:'400',opacity:.5,fontSize:'10px'}}>S{i+1}</div></th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {DAYS.map(day=>(
+                <tr key={day}>
+                  <td className="day-cell">{day.slice(0,3).toUpperCase()}</td>
+                  {[1,2,3,4,5,6,7,8].map(si=>{
+                    const dayPrefix = day.slice(0,3).toUpperCase();
+                    const key = `${day}_${si}`;
+                    const altKey = `${dayPrefix}_S${si}`;
+                    // Support both key formats from backend
+                    const cells = [];
+                    Object.entries(grid).forEach(([k,v])=>{
+                      if(!v) return;
+                      if(k === key || k === altKey) cells.push(v);
+                      // Array of cells in a slot
+                      if(Array.isArray(v) && (k===key||k===altKey)) v.forEach(c=>cells.push(c));
+                    });
+                    if(!cells.length) return <td key={si}><div className="empty-cell">·</div></td>;
+                    return (
+                      <td key={si}>
+                        {cells.map((cell,ci)=>{
+                          const pub = cell.status==='published';
+                          const isLab = cell.is_lab || cell.type==='lab';
+                          return (
+                            <div key={ci} className={`cell-inner ${isLab?'is-lab':''} ${pub?'published':''}`}>
+                              <div className={`cell-code ${isLab?'is-lab':''} ${pub?'published':''}`}>
+                                {cell.course_code||cell.code}
+                                {cell.section?` §${cell.section}`:''}
+                                {isLab && <span style={{fontSize:'9px',marginLeft:'4px',opacity:.7}}>LAB</span>}
+                              </div>
+                              <div className="cell-name">{cell.course_name||cell.title||''}</div>
+                              <div className="cell-teacher">{cell.teacher||cell.instructor||''}</div>
+                              <div className="cell-room">{cell.room||cell.room_id||''}</div>
+                            </div>
+                          );
+                        })}
+                      </td>
+                    );
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : !loading ? (
+        <div className="empty-state">Select a batch or program and click Load to view the timetable</div>
+      ) : null}
+    </div>
+  );
+}
+
+// ── Scheduler ─────────────────────────────────────────────────────────────
+
+function SchedulerPanel({token, batches}){
+  const [scope, setScope] = useState('batch');
+  const [targetId, setTargetId] = useState('');
+  const [program, setProgram] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [msg, setMsg] = useState(null);
+  const [action, setAction] = useState('generate');
+
+  const run = async () => {
+    const id = scope === 'program' ? program : targetId;
+    if(!id) return;
+    setLoading(true); setMsg(null);
+    try {
+      if(action==='generate'){
+        const d = await apiFetch(`/scheduler/generate?scope=${scope}&id=${id}`, {method:'POST'}, token);
+        setMsg({type:'success', text: JSON.stringify(d, null, 2)});
+      } else if(action==='publish'){
+        await apiFetch(`/scheduler/publish/${id}`, {method:'POST'}, token);
+        setMsg({type:'success', text:`Published successfully.`});
+      } else if(action==='clear'){
+        await apiFetch(`/scheduler/clear/${id}?force=false`, {method:'DELETE'}, token);
+        setMsg({type:'warn', text:`Draft schedule cleared.`});
+      }
+    } catch(e){ setMsg({type:'err', text:e.message}); }
+    setLoading(false);
+  };
+
+  return (
+    <div>
+      <div className="grid-3" style={{marginBottom:'16px'}}>
+        <div className="stat-card">
+          <div className="stat-label" style={{marginBottom:'8px'}}>Action</div>
+          <select className="select" style={{width:'100%'}} value={action} onChange={e=>setAction(e.target.value)}>
+            <option value="generate">Generate Schedule</option>
+            <option value="publish">Publish Draft</option>
+            <option value="clear">Clear Drafts</option>
+          </select>
+        </div>
+        <div className="stat-card">
+          <div className="stat-label" style={{marginBottom:'8px'}}>Scope</div>
+          <select className="select" style={{width:'100%'}} value={scope} onChange={e=>setScope(e.target.value)}>
+            <option value="batch">Batch</option>
+            <option value="department">Department</option>
+            <option value="faculty">Faculty</option>
+            <option value="program">Program (local)</option>
+          </select>
+        </div>
+        <div className="stat-card">
+          <div className="stat-label" style={{marginBottom:'8px'}}>
+            {scope === 'program' ? 'Program' : 'Batch ID'}
+          </div>
+          {scope === 'program' ? (
+            <select className="select" style={{width:'100%'}} value={program} onChange={e=>setProgram(e.target.value)}>
+              <option value="">Select program...</option>
+              {PROGRAMS.map(p=><option key={p} value={p}>{p}</option>)}
+            </select>
+          ) : (
+            <select className="select" style={{width:'100%'}} value={targetId} onChange={e=>setTargetId(e.target.value)}>
+              <option value="">Select batch...</option>
+              {batches.map(b=><option key={b.id} value={b.id}>{b.name||`Batch ${b.id}`}</option>)}
+            </select>
+          )}
+        </div>
+      </div>
+      <div className="flex-row">
+        <button className={`btn ${action==='clear'?'btn-danger':action==='publish'?'btn-success':'btn-primary'}`}
+          onClick={run} disabled={loading||(!targetId&&!program)}>
+          {loading ? <span className="loader"/> : action==='generate'?'Run Scheduler':action==='publish'?'Publish':'Clear Drafts'}
+        </button>
+        {msg && <button className="btn btn-ghost btn-sm" onClick={()=>setMsg(null)}>Dismiss</button>}
+      </div>
+      {msg && (
+        <div className={`notice ${msg.type==='success'?'success':msg.type==='warn'?'warn':'danger'}`} style={{marginTop:'16px',fontFamily:msg.type==='success'&&msg.text.startsWith('{')?'var(--mono)':'inherit',fontSize:'11px',whiteSpace:'pre-wrap'}}>
+          {msg.type==='err'?'Error: ':''}{msg.text}
+        </div>
+      )}
+      <div className="notice" style={{marginTop:'16px'}}>
+        CSP backtracking engine · 28s timeout · 8 slots/day (Mon–Thu) · 8 slots/day (Fri, adjusted for Jumu'ah)
+      </div>
+    </div>
+  );
+}
+
+// ── Conflicts ─────────────────────────────────────────────────────────────
+
+function ConflictsView({token, batches}){
+  const [batchId, setBatchId] = useState('');
+  const [conflicts, setConflicts] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  const load = async () => {
+    if(!batchId) return;
+    setLoading(true);
+    try {
+      const d = await apiFetch(`/conflicts/${batchId}`, {}, token);
+      setConflicts(d.conflicts);
+    } catch(e){ setConflicts([]); }
+    setLoading(false);
+  };
+
+  return (
+    <div>
+      <div className="flex-row" style={{marginBottom:'16px'}}>
+        <select className="select" value={batchId} onChange={e=>setBatchId(e.target.value)}>
+          <option value="">Select batch...</option>
+          {batches.map(b=><option key={b.id} value={b.id}>{b.name||`Batch ${b.id}`}</option>)}
+        </select>
+        <button className="btn btn-primary btn-sm" onClick={load} disabled={loading||!batchId}>
+          {loading ? <span className="loader"/> : 'Check Conflicts'}
+        </button>
+      </div>
+      {conflicts !== null && (
+        conflicts.length === 0
+          ? <div className="notice success">✓ No conflicts detected in this batch schedule.</div>
+          : <>
+            <div className="notice warn" style={{marginBottom:'12px'}}>{conflicts.length} conflict{conflicts.length!==1?'s':''} found</div>
+            {conflicts.map((c,i)=>(
+              <div className="conflict-item" key={i}>
+                <div className="conflict-type">{c.type?.toUpperCase().replace(/_/g,' ')}</div>
+                <div className="conflict-detail">
+                  {c.day} · Slot {c.slot} · {c.course_a} vs {c.course_b}
+                  {c.room && <span style={{color:'var(--accent2)',marginLeft:'8px'}}>Room: {c.room}</span>}
+                  {c.teacher && <span style={{color:'var(--muted)',marginLeft:'8px'}}>Teacher: {c.teacher}</span>}
+                </div>
+                {c.suggestion && <div className="conflict-suggest">Suggestion: {c.suggestion}</div>}
+              </div>
+            ))}
+          </>
+      )}
+      {conflicts === null && !loading && (
+        <div className="empty-state">Select a batch and check for scheduling conflicts</div>
+      )}
+    </div>
+  );
+}
+
+// ── Courses Browser ───────────────────────────────────────────────────────
+
+function CoursesView({token}){
+  const [search, setSearch] = useState('');
+  const [filterProgram, setFilterProgram] = useState('');
+  const [filterType, setFilterType] = useState('');
+  const [apiData, setApiData] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  // Try to load from backend; fall back to embedded data
+  useEffect(()=>{
+    if(!token) return;
+    setLoading(true);
+    apiFetch('/courses', {}, token)
+      .then(d=>{ if(Array.isArray(d)&&d.length) setApiData(d); })
+      .catch(()=>{})
+      .finally(()=>setLoading(false));
+  }, [token]);
+
+  const data = apiData || COURSES_DATA;
+
+  const filtered = useMemo(()=>data.filter(c=>{
+    const q = search.toLowerCase();
+    const matchQ = !q || c.code?.toLowerCase().includes(q) || c.title?.toLowerCase().includes(q) || c.instructor?.toLowerCase().includes(q) || (c.section||'').toLowerCase().includes(q);
+    const matchP = !filterProgram || c.program === filterProgram;
+    const matchT = !filterType || c.type === filterType;
+    return matchQ && matchP && matchT;
+  }), [data, search, filterProgram, filterType]);
+
+  const programs = [...new Set(data.map(c=>c.program).filter(Boolean))].sort();
+
+  function progTag(p){
+    if(!p) return 'tag-other';
+    if(p.startsWith('CYS')) return 'tag-cys';
+    if(p.startsWith('CS')||p.startsWith('BAI')||p.startsWith('BCS')||p.startsWith('SE')||p.startsWith('BDS')) return 'tag-cs';
+    if(p.startsWith('EE')||p.startsWith('BCE')||p.startsWith('BEE')) return 'tag-ee';
+    if(p.startsWith('ME')||p.startsWith('BME')||p.startsWith('CME')||p.startsWith('CVE')) return 'tag-me';
+    return 'tag-other';
+  }
+
+  return (
+    <div>
+      <div className="flex-row" style={{marginBottom:'16px',flexWrap:'wrap'}}>
+        <input className="search-input" placeholder="Search code, title, instructor..." value={search} onChange={e=>setSearch(e.target.value)} />
+        <select className="select" value={filterProgram} onChange={e=>setFilterProgram(e.target.value)}>
+          <option value="">All programs</option>
+          {programs.map(p=><option key={p} value={p}>{p}</option>)}
+        </select>
+        <select className="select" value={filterType} onChange={e=>setFilterType(e.target.value)}>
+          <option value="">All types</option>
+          <option value="lecture">Lecture</option>
+          <option value="lab">Lab</option>
+        </select>
+        <span style={{fontSize:'12px',color:'var(--muted)',fontFamily:'var(--mono)'}}>{filtered.length} / {data.length}</span>
+        {apiData && <span style={{fontSize:'10px',color:'var(--success)',fontFamily:'var(--mono)'}}>● live</span>}
+      </div>
+      <div style={{overflowX:'auto'}}>
+        <table style={{width:'100%',borderCollapse:'collapse',fontSize:'12px'}}>
+          <thead>
+            <tr>
+              {['Code','Sec','Title','Cr','Type','Instructor','Program','Cap'].map(h=>(
+                <th key={h} style={{textAlign:'left',padding:'8px 12px',borderBottom:'1px solid var(--border)',color:'var(--muted)',fontFamily:'var(--mono)',fontSize:'10px',letterSpacing:'1px',whiteSpace:'nowrap'}}>{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {filtered.map((c,i)=>(
+              <tr key={i} style={{borderBottom:'1px solid rgba(42,53,80,.4)'}}>
+                <td style={{padding:'7px 12px',fontFamily:'var(--mono)',color:'var(--accent)',fontSize:'11px',whiteSpace:'nowrap'}}>{c.code}</td>
+                <td style={{padding:'7px 12px',color:'var(--muted)',fontSize:'11px'}}>{c.section||'—'}</td>
+                <td style={{padding:'7px 12px',color:'var(--text)',maxWidth:'240px'}}>{c.title}</td>
+                <td style={{padding:'7px 12px',color:'var(--muted)',textAlign:'center'}}>{c.credits||c.credit_hours}</td>
+                <td style={{padding:'7px 12px'}}>
+                  <span className={`badge ${c.type==='lab'?'badge-lab':'badge-lec'}`}>{c.type}</span>
+                </td>
+                <td style={{padding:'7px 12px',color:'var(--muted)',fontSize:'11px',whiteSpace:'nowrap'}}>{c.instructor}</td>
+                <td style={{padding:'7px 12px'}}>
+                  <span className={`tag ${progTag(c.program)}`}>{c.program}</span>
+                </td>
+                <td style={{padding:'7px 12px',color:'var(--muted)',textAlign:'right'}}>{c.capacity}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {filtered.length === 0 && <div className="empty-state">No courses match your filter</div>}
+      </div>
+    </div>
+  );
+}
+
+// ── Rooms Browser ─────────────────────────────────────────────────────────
+
+function RoomsView({token}){
+  const [search, setSearch] = useState('');
+  const [filterBuilding, setFilterBuilding] = useState('');
+  const [filterType, setFilterType] = useState('');
+  const [apiData, setApiData] = useState(null);
+
+  useEffect(()=>{
+    if(!token) return;
+    apiFetch('/rooms', {}, token).then(d=>{ if(Array.isArray(d)&&d.length) setApiData(d); }).catch(()=>{});
+  }, [token]);
+
+  const data = apiData || ROOMS_DATA;
+  const buildings = [...new Set(data.map(r=>r.building).filter(Boolean))].sort();
+
+  const filtered = useMemo(()=>data.filter(r=>{
+    const q = search.toLowerCase();
+    const matchQ = !q || r.room_id?.toLowerCase().includes(q) || r.id?.toLowerCase().includes(q) || r.room_name?.toLowerCase().includes(q) || r.name?.toLowerCase().includes(q);
+    const matchB = !filterBuilding || r.building === filterBuilding;
+    const matchT = !filterType || r.type === filterType;
+    return matchQ && matchB && matchT;
+  }), [data, search, filterBuilding, filterType]);
+
+  const capColor = cap => cap >= 150 ? 'var(--danger)' : cap >= 80 ? 'var(--warn)' : cap >= 50 ? 'var(--accent)' : 'var(--muted)';
+
+  return (
+    <div>
+      <div className="flex-row" style={{marginBottom:'16px'}}>
+        <input className="search-input" placeholder="Search room..." value={search} onChange={e=>setSearch(e.target.value)} />
+        <select className="select" value={filterBuilding} onChange={e=>setFilterBuilding(e.target.value)}>
+          <option value="">All buildings</option>
+          {buildings.map(b=><option key={b} value={b}>{b}</option>)}
+        </select>
+        <select className="select" value={filterType} onChange={e=>setFilterType(e.target.value)}>
+          <option value="">All types</option>
+          <option value="lecture_hall">Lecture Hall</option>
+          <option value="main_hall">Main Hall</option>
+          <option value="lab">Lab</option>
+        </select>
+        <span style={{fontSize:'12px',color:'var(--muted)',fontFamily:'var(--mono)'}}>{filtered.length} / {data.length}</span>
+        {apiData && <span style={{fontSize:'10px',color:'var(--success)',fontFamily:'var(--mono)'}}>● live</span>}
+      </div>
+      <div style={{overflowX:'auto'}}>
+        <table style={{width:'100%',borderCollapse:'collapse',fontSize:'12px'}}>
+          <thead>
+            <tr>
+              {['Room ID','Name','Building','Type','Capacity'].map(h=>(
+                <th key={h} style={{textAlign:'left',padding:'8px 12px',borderBottom:'1px solid var(--border)',color:'var(--muted)',fontFamily:'var(--mono)',fontSize:'10px',letterSpacing:'1px'}}>{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {filtered.map((r,i)=>(
+              <tr key={i} style={{borderBottom:'1px solid rgba(42,53,80,.4)'}}>
+                <td style={{padding:'7px 12px',fontFamily:'var(--mono)',color:'var(--accent2)',fontSize:'11px'}}>{r.room_id||r.id}</td>
+                <td style={{padding:'7px 12px',color:'var(--text)'}}>{r.room_name||r.name}</td>
+                <td style={{padding:'7px 12px',color:'var(--muted)'}}>{r.building}</td>
+                <td style={{padding:'7px 12px'}}>
+                  <span className="badge" style={{background:'rgba(107,114,128,.1)',color:'var(--muted)',border:'1px solid var(--border)'}}>
+                    {(r.type||'').replace('_',' ')}
+                  </span>
+                </td>
+                <td style={{padding:'7px 12px',fontFamily:'var(--mono)',color:capColor(r.capacity),fontWeight:'600'}}>{r.capacity}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {filtered.length === 0 && <div className="empty-state">No rooms match</div>}
+      </div>
+    </div>
+  );
+}
+
+// ── Timeslots View ────────────────────────────────────────────────────────
+
+function TimeslotsView(){
+  return (
+    <div>
+      <div className="notice" style={{marginBottom:'16px'}}>
+        Friday slots 3–5 are shifted earlier (10:00–12:50) to accommodate Jumu'ah prayer. All other days run 08:00–17:20 with breaks at 09:50–10:30 and 13:20–14:30.
+      </div>
+      <div style={{overflowX:'auto'}}>
+        <table style={{width:'100%',borderCollapse:'collapse',fontSize:'12px'}}>
+          <thead>
+            <tr>
+              {['Slot ID','Day','Start','End','Index','Type'].map(h=>(
+                <th key={h} style={{textAlign:'left',padding:'8px 12px',borderBottom:'1px solid var(--border)',color:'var(--muted)',fontFamily:'var(--mono)',fontSize:'10px',letterSpacing:'1px'}}>{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {DAYS.flatMap(day=>
+              TIMESLOTS[day].map(s=>(
+                <tr key={s.id} style={{borderBottom:'1px solid rgba(42,53,80,.35)',background:day==='Friday'?'rgba(245,158,11,.03)':'transparent'}}>
+                  <td style={{padding:'7px 12px',fontFamily:'var(--mono)',color:'var(--accent)',fontSize:'11px'}}>{s.id}</td>
+                  <td style={{padding:'7px 12px',color:'var(--text)'}}>{day}</td>
+                  <td style={{padding:'7px 12px',fontFamily:'var(--mono)',color:'var(--muted)',fontSize:'11px'}}>{s.label.split('–')[0]}</td>
+                  <td style={{padding:'7px 12px',fontFamily:'var(--mono)',color:'var(--muted)',fontSize:'11px'}}>{s.label.split('–')[1]}</td>
+                  <td style={{padding:'7px 12px',color:'var(--muted)',textAlign:'center'}}>{s.idx}</td>
+                  <td style={{padding:'7px 12px'}}>
+                    <span className={`badge ${day==='Friday'?'badge-draft':'badge-lec'}`}>{day==='Friday'?'friday':'regular'}</span>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+// ── Generic Entity Table ───────────────────────────────────────────────────
+
+function EntityTable({token, entity}){
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(()=>{
+    apiFetch(`/${entity}`, {}, token)
+      .then(d=>setData(Array.isArray(d)?d:[]))
+      .catch(()=>setData([]))
+      .finally(()=>setLoading(false));
+  }, [entity, token]);
+
+  if(loading) return <div style={{padding:'20px',textAlign:'center'}}><span className="loader"/></div>;
+  if(!data.length) return <div className="empty-state">No {entity} found — backend may not be running</div>;
+
+  const keys = Object.keys(data[0]).filter(k=>k!=='hashed_password');
+  return (
+    <div style={{overflowX:'auto'}}>
+      <table style={{width:'100%',borderCollapse:'collapse',fontSize:'12px'}}>
+        <thead>
+          <tr>
+            {keys.map(k=>(
+              <th key={k} style={{textAlign:'left',padding:'8px 12px',borderBottom:'1px solid var(--border)',color:'var(--muted)',fontFamily:'var(--mono)',fontSize:'10px',letterSpacing:'1px',whiteSpace:'nowrap'}}>
+                {k.toUpperCase()}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {data.map((row,i)=>(
+            <tr key={i} style={{borderBottom:'1px solid rgba(42,53,80,.5)'}}>
+              {keys.map(k=>(
+                <td key={k} style={{padding:'8px 12px',color:k==='id'?'var(--muted)':k.includes('name')||k.includes('code')?'var(--text)':'var(--muted)',fontFamily:k==='id'||k==='code'?'var(--mono)':'inherit'}}>
+                  {String(row[k] ?? '—')}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+// ── Dashboard ─────────────────────────────────────────────────────────────
+
+function Dashboard({token, batches, stats}){
+  const totalCourses = COURSES_DATA.length;
+  const totalRooms = ROOMS_DATA.length;
+  const labs = ROOMS_DATA.filter(r=>r.type==='lab').length;
+  const lecHalls = ROOMS_DATA.filter(r=>r.type==='lecture_hall').length;
+  const programs = PROGRAMS.length;
+
+  return (
+    <div>
+      <div className="grid-3">
+        <div className="stat-card"><div className="stat-val" style={{color:'var(--accent)'}}>{stats.batches||batches.length||'—'}</div><div className="stat-label">Batches</div></div>
+        <div className="stat-card"><div className="stat-val" style={{color:'var(--accent3)'}}>{stats.teachers||'—'}</div><div className="stat-label">Teachers</div></div>
+        <div className="stat-card"><div className="stat-val" style={{color:'var(--accent2)'}}>{totalRooms}</div><div className="stat-label">Rooms ({labs} labs)</div></div>
+        <div className="stat-card"><div className="stat-val" style={{color:'var(--success)'}}>{totalCourses}</div><div className="stat-label">Courses (seed)</div></div>
+        <div className="stat-card"><div className="stat-val" style={{color:'var(--warn)'}}>{programs}</div><div className="stat-label">Programs</div></div>
+        <div className="stat-card"><div className="stat-val" style={{color:'#f472b6'}}>40</div><div className="stat-label">Timeslots</div></div>
+      </div>
+      <div className="grid-2">
+        <div className="card">
+          <div className="card-header"><div className="card-title">Programs</div></div>
+          <div style={{display:'flex',flexWrap:'wrap',gap:'6px'}}>
+            {PROGRAMS.map(p=>(
+              <span key={p} className={`tag ${p.startsWith('CYS')?'tag-cys':p.startsWith('EE')||p.startsWith('BCE')||p.startsWith('BEE')?'tag-ee':p.startsWith('ME')||p.startsWith('BME')||p.startsWith('CME')||p.startsWith('CVE')?'tag-me':'tag-cs'}`} style={{padding:'3px 8px',borderRadius:'4px',fontSize:'11px'}}>
+                {p}
+              </span>
+            ))}
+          </div>
+        </div>
+        <div className="card">
+          <div className="card-header"><div className="card-title">Buildings</div></div>
+          {['FCSE','FEE','FES','ACB','BB','FME','FMCE'].map(b=>{
+            const count = ROOMS_DATA.filter(r=>r.building===b).length;
+            return (
+              <div key={b} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'4px 0',borderBottom:'1px solid rgba(42,53,80,.4)',fontSize:'12px'}}>
+                <span style={{fontFamily:'var(--mono)',color:'var(--accent2)'}}>{b}</span>
+                <span style={{color:'var(--muted)'}}>{count} rooms</span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+      <div className="card">
+        <div className="card-header"><div className="card-title">API Endpoints</div></div>
+        {['/auth/login','/timetable/{batch_id}','/scheduler/generate?scope={scope}&id={id}','/scheduler/publish/{id}','/scheduler/clear/{id}','/conflicts/{batch_id}','/export/pdf/{batch_id}','/courses','/rooms','/teachers','/batches','/departments','/faculties'].map(ep=>(
+          <code key={ep} className="api-url">{API}{ep}</code>
+        ))}
+      </div>
+      <div className="notice">
+        Backend at <code style={{fontFamily:'var(--mono)'}}>localhost:8000</code>. Courses, rooms, and timeslots are embedded from seed data and augmented live when the backend is up.
+      </div>
+    </div>
+  );
+}
+
+// ── Nav config ─────────────────────────────────────────────────────────────
+
+const NAV = [
+  {id:'dashboard',label:'Dashboard',icon:'⊞'},
+  {id:'timetable',label:'Timetable',icon:'▦'},
+  {id:'scheduler',label:'Scheduler',icon:'⚙'},
+  {id:'conflicts',label:'Conflicts',icon:'⚠'},
+  {id:'courses',label:'Courses',icon:'◆'},
+  {id:'rooms',label:'Rooms',icon:'▣'},
+  {id:'timeslots',label:'Timeslots',icon:'⏱'},
+  {id:'teachers',label:'Teachers',icon:'◎'},
+  {id:'batches',label:'Batches',icon:'◉'},
+  {id:'departments',label:'Departments',icon:'◈'},
+  {id:'faculties',label:'Faculties',icon:'🏛'},
+];
+
+// ── App Root ──────────────────────────────────────────────────────────────
+
+function App(){
+  const [token, saveToken, clearToken] = useToken();
+  const [page, setPage] = useState('dashboard');
+  const [batches, setBatches] = useState([]);
+  const [stats, setStats] = useState({batches:0,teachers:0,rooms:0,courses:0,departments:0,faculties:0});
+
+  useEffect(()=>{
+    if(!token) return;
+    ['batches','teachers','departments','faculties'].forEach(e=>{
+      apiFetch(`/${e}`, {}, token)
+        .then(d=>{ if(Array.isArray(d)){ setStats(s=>({...s,[e]:d.length})); if(e==='batches') setBatches(d); }})
+        .catch(()=>{});
+    });
+  }, [token]);
+
+  if(!token){
+    return (
+      <div className="app" style={{justifyContent:'center',alignItems:'center'}}>
+        <LoginPage onLogin={saveToken} />
+      </div>
+    );
+  }
+
+  return (
+    <div className="app">
+      <div className="sidebar">
+        <div className="sidebar-logo">
+          <div className="logo-text">GIKI_TT</div>
+          <div className="logo-sub">TIMETABLE SYSTEM</div>
+        </div>
+        <div className="nav">
+          {NAV.map(n=>(
+            <div key={n.id} className={`nav-item ${page===n.id?'active':''}`} onClick={()=>setPage(n.id)}>
+              <span style={{fontSize:'13px'}}>{n.icon}</span>
+              <span>{n.label}</span>
+            </div>
+          ))}
+        </div>
+        <div className="sidebar-bottom">
+          <div className="auth-pill" onClick={clearToken}>✓ Authenticated · Logout</div>
+        </div>
+      </div>
+      <div className="main">
+        <div className="topbar">
+          <div className="page-title">{NAV.find(n=>n.id===page)?.label?.toUpperCase()}</div>
+          <div style={{fontSize:'11px',color:'var(--muted)',fontFamily:'var(--mono)'}}>GIK Institute · {new Date().toLocaleDateString('en-PK',{weekday:'short',month:'short',day:'numeric'})}</div>
+        </div>
+        <div className="content">
+          {page==='dashboard'   && <Dashboard token={token} batches={batches} stats={stats}/>}
+          {page==='timetable'   && <div className="card"><div className="card-header"><div className="card-title">Timetable Grid</div></div><TimetableView token={token} batches={batches}/></div>}
+          {page==='scheduler'   && <div className="card"><div className="card-header"><div className="card-title">Schedule Generator</div></div><SchedulerPanel token={token} batches={batches}/></div>}
+          {page==='conflicts'   && <div className="card"><div className="card-header"><div className="card-title">Conflict Detector</div></div><ConflictsView token={token} batches={batches}/></div>}
+          {page==='courses'     && <div className="card"><div className="card-header"><div className="card-title">Courses — {COURSES_DATA.length} loaded from seed</div></div><CoursesView token={token}/></div>}
+          {page==='rooms'       && <div className="card"><div className="card-header"><div className="card-title">Rooms — {ROOMS_DATA.length} total</div></div><RoomsView token={token}/></div>}
+          {page==='timeslots'   && <div className="card"><div className="card-header"><div className="card-title">Timeslots — 40 defined (5 days × 8 slots)</div></div><TimeslotsView/></div>}
+          {page==='teachers'    && <div className="card"><div className="card-header"><div className="card-title">Teachers</div></div><EntityTable token={token} entity="teachers"/></div>}
+          {page==='batches'     && <div className="card"><div className="card-header"><div className="card-title">Batches</div></div><EntityTable token={token} entity="batches"/></div>}
+          {page==='departments' && <div className="card"><div className="card-header"><div className="card-title">Departments</div></div><EntityTable token={token} entity="departments"/></div>}
+          {page==='faculties'   && <div className="card"><div className="card-header"><div className="card-title">Faculties</div></div><EntityTable token={token} entity="faculties"/></div>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
