@@ -1,0 +1,9 @@
+.claude/
+package-lock.json
+node_modules/
+*.db
+.venv/
+__pycache__/
+*.pyc
+dist/
+.env
