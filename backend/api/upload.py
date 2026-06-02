@@ -171,9 +171,28 @@ async def upload_courses(
     # Cache depts and teachers to avoid repeated DB hits
     dept_cache    = {}
     teacher_cache = {}
-    # In-memory dedup: (course_code, batch_id) — prevents duplicates within
-    # the same upload since uncommitted inserts are invisible to db.query()
-    seen_courses = set()
+    seen_courses  = set()
+
+    # --- Clear existing courses for every department present in this file ---
+    # This makes each upload a full replace, not an additive operation.
+    programs_in_file = {
+        str(row.get("program", "")).strip().lower()
+        for _, row in df.iterrows()
+    }
+    dept_names_to_clear = {
+        PROGRAM_TO_DEPT[p]
+        for p in programs_in_file
+        if p in PROGRAM_TO_DEPT
+    }
+    for dept_name in dept_names_to_clear:
+        dept_obj = db.query(Department).filter(Department.name == dept_name).first()
+        if not dept_obj:
+            continue
+        batch_ids = [b.id for b in db.query(Batch).filter(Batch.dept_id == dept_obj.id).all()]
+        if batch_ids:
+            db.query(Course).filter(Course.batch_id.in_(batch_ids)).delete(synchronize_session=False)
+    db.commit()
+    # -----------------------------------------------------------------------
 
     for i, row in df.iterrows():
         row_num = i + 2
@@ -244,12 +263,6 @@ async def upload_courses(
         for batch in target_batches:
             dedup_key = (course_code, batch.id)
             if dedup_key in seen_courses:
-                continue
-            if db.query(Course).filter(
-                Course.code == course_code,
-                Course.batch_id == batch.id,
-            ).first():
-                seen_courses.add(dedup_key)
                 continue
             seen_courses.add(dedup_key)
 

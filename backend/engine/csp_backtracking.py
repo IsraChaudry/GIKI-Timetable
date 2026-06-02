@@ -37,7 +37,7 @@ def load_courses(scope: str, scope_id: int, db):
     return []
 
 
-def place_lab(course, placed: dict, db):
+def place_lab(course, placed: dict, db, ps=None):
     dept  = db.query(Department).filter(Department.id == course.dept_id).first()
     batch = db.query(Batch).filter(Batch.id == course.batch_id).first()
 
@@ -46,6 +46,14 @@ def place_lab(course, placed: dict, db):
 
     slots = LAB_MORNING if dept.lab_window == "morning" else LAB_AFTERNOON
     day   = dept.lab_day
+
+    if ps:
+        # Skip if teacher is already teaching at these slots (e.g. other section's lab)
+        if any((day, s) in ps['teacher'].get(course.teacher_id, set()) for s in slots):
+            return {"ok": False, "error": f"{course.code}: teacher already teaching another section at this lab slot"}
+        # Skip if batch is already in class at these slots (multiple labs same window)
+        if any((day, s) in ps['batch'].get(course.batch_id, set()) for s in slots):
+            return {"ok": False, "error": f"{course.code}: batch already has a lab at this slot"}
 
     lab_rooms = db.query(Room).filter(
         Room.type == "lab_room",
@@ -251,7 +259,7 @@ def _run_scheduler_inner(scope: str, scope_id: int, db, batch_ids_override=None)
 
     lab_courses = [c for c in courses if c.is_lab and _in_scope(c)]
     for lc in lab_courses:
-        result = place_lab(lc, placed, db)
+        result = place_lab(lc, placed, db, ps=ps)
         if result["ok"]:
             placed.update(result["occupied"])
             for s in result["slots"]:
